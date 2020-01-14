@@ -32,7 +32,9 @@ defmodule BugElixirTortoiseSchedulers.Asset do
   end
 
   defp publish(state) do
-    Tortoise.publish("sim#{state.serial}", "topicBla", "valueBlu", qos: 0)
+    for i <- 1..28 do
+      Tortoise.publish("sim#{state.serial}", "topicBla#{i}", "valueBlu#{i}", qos: 0)
+    end
   end
 
 end
