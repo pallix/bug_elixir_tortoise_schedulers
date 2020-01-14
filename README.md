@@ -1,21 +1,23 @@
 # BugElixirTortoiseSchedulers
 
-**TODO: Add description**
+Illustrate how the Erlang VM can become stucked when a lot of Tortoise connection
+are created, even though system resources are still available.
 
-## Installation
+## Reproduction of the problem
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `bug_elixir_tortoise_schedulers` to your list of dependencies in `mix.exs`:
+- Install the MQTT `mosquitto` server package.
 
-```elixir
-def deps do
-  [
-    {:bug_elixir_tortoise_schedulers, "~> 0.1.0"}
-  ]
-end
+- Starts iex and type:
+
+```
+for i <- 0..55, do: BugElixirTortoiseSchedulers.Cluster.start_slice(i)
 ```
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/bug_elixir_tortoise_schedulers](https://hexdocs.pm/bug_elixir_tortoise_schedulers).
+This will starts a bunch of MQTT mosquitto servers, each running in its own
+network namespace. At the same time, it starts one Tortoise connection per
+server. Every second, a value is published on each of the servers.
 
+## Observation
+
+After several minutes, when the number of connections is high (>300) the BEAM VM becomes stucked.
+On AWS, on a `m5.2xlarge` instance, it takes around 512 connections.
